@@ -8,4 +8,14 @@ return {
     dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
     opts = {},
   },
+  {
+    'praem90/nvim-phpcsf',
+    config = function()
+      require('phpcs').setup {
+        phpcs = '~/.config/composer/vendor/bin/phpcs',
+        phpcbf = '~/.config/composer/vendor/bin/phpcbf',
+        standard = 'moodle-extra',
+      }
+    end,
+  },
 }

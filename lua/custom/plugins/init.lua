@@ -22,4 +22,13 @@ return {
       vim.keymap.set('n', '<leader>pf', phpsniff.cbf, { desc = '[P]HP [F]ormat' })
     end,
   },
+  {
+    'stevearc/oil.nvim',
+    ---@module 'oil'
+    ---@type oil.SetupOpts
+    opts = {},
+    -- Optional dependencies
+    -- dependencies = { { 'echasnovski/mini.icons', opts = {} } },
+    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if prefer nvim-web-devicons
+  },
 }

@@ -148,13 +148,18 @@ return {
       {
         type = 'php',
         request = 'launch',
+        hostname = '0.0.0.0',
         name = 'Listen for Xdebug',
         port = 9003,
+        -- host = 'localhost',
         pathMappings = {
           ['/var/www/html/'] = '${workspaceFolder}',
+          -- ['/var/www/html/'] = '/home/ip/docker/m45/public_html',
         },
       },
     }
+
+    vim.cmd 'let g:dap_log_file = "~/.local/share/nvim/dap.log"'
     -- Install golang specific config
     require('dap-go').setup {
       delve = {

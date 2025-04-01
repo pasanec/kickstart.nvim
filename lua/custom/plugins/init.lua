@@ -47,4 +47,11 @@ return {
   {
     'tpope/vim-fugitive',
   },
+  {
+    'tjdevries/ocaml.nvim',
+    build = 'make',
+    config = function()
+      require('ocaml').setup()
+    end,
+  },
 }

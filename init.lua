@@ -169,6 +169,8 @@ vim.o.confirm = true
 -- Set tabstop and shiftwidth
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
+vim.opt_local.softtabstop = 4
+vim.opt_local.expandtab = true
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`

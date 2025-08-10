@@ -90,4 +90,20 @@ return {
       }
     end,
   },
+  {
+    'nvim-flutter/flutter-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    ft = { 'dart' },
+    config = function()
+      require('flutter-tools').setup {} -- use defaults
+    end,
+  },
+  {
+    'nvim-flutter/pubspec-assist.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim' },
+    ft = { 'dart' },
+    config = function()
+      require('pubspec-assist').setup {} -- use defaults
+    end,
+  },
 }

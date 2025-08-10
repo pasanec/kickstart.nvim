@@ -10,12 +10,13 @@ return {
   },
   {
     'praem90/nvim-phpcsf',
+    dependencies = { 'nvim-telescope/telescope.nvim' },
     ft = 'php',
     config = function()
       local phpsniff = require 'phpcs'
       phpsniff.setup {
-        phpcs = '~/.config/composer/vendor/bin/phpcs',
-        phpcbf = '~/.config/composer/vendor/bin/phpcbf',
+        phpcs = vim.fn.expand('~') .. '/.config/composer/vendor/bin/phpcs',
+        phpcbf = vim.fn.expand('~') .. '/.config/composer/vendor/bin/phpcbf',
         standard = 'moodle-extra',
       }
       vim.keymap.set('n', '<leader>ps', phpsniff.cs, { desc = '[P]HP [S]niff' })

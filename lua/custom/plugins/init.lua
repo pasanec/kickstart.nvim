@@ -15,8 +15,8 @@ return {
     config = function()
       local phpsniff = require 'phpcs'
       phpsniff.setup {
-        phpcs = vim.fn.expand('~') .. '/.config/composer/vendor/bin/phpcs',
-        phpcbf = vim.fn.expand('~') .. '/.config/composer/vendor/bin/phpcbf',
+        phpcs = vim.fn.expand '~' .. '/.config/composer/vendor/bin/phpcs',
+        phpcbf = vim.fn.expand '~' .. '/.config/composer/vendor/bin/phpcbf',
         standard = 'moodle-extra',
       }
       vim.keymap.set('n', '<leader>ps', phpsniff.cs, { desc = '[P]HP [S]niff' })
@@ -62,19 +62,47 @@ return {
       'nvim-treesitter/nvim-treesitter',
       'github/copilot.vim',
     },
-    opts = {
-      strategies = {
-        chat = {
-          adapter = "copilot",
+    opts = function()
+      local adapters = require 'codecompanion.adapters'
+      return {
+        -- (optional) turn on logging while you debug
+        opts = { log_level = 'DEBUG' },
+
+        adapters = {
+          lmstudio = function()
+            local adapters = require 'codecompanion.adapters'
+            return adapters.extend('openai_compatible', {
+              env = {
+                url = 'http://127.0.0.1:1234',
+                api_key = 'lm-studio',
+                chat_url = '/v1/chat/completions',
+                models_endpoint = '/v1/models',
+              },
+              headers = { ['Authorization'] = 'Bearer ${api_key}' },
+
+              -- this forces all requests CodeCompanion sends to LM Studio
+              extra_body = {
+                stream = false,
+              },
+
+              schema = {
+                -- model = { default = 'openai/gpt-oss-20b' },
+                model = { default = 'qwen3-coder-30b-a3b-instruct' },
+                temperature = { default = 0.2 },
+                max_tokens = { default = 1024 },
+              },
+            })
+          end,
         },
-        inline = {
-          adapter = "copilot",
+
+        strategies = {
+          -- if you want to keep Copilot for chat/inline, leave these as 'copilot'
+          chat = { adapter = 'lmstudio' },
+          inline = { adapter = 'lmstudio' },
+          agent = { adapter = 'lmstudio' }, -- needs tool-calling support (see note below)
         },
-        agent = {
-          adapter = "copilot",
-        },
-      },
-    },
+      }
+    end,
   },
   {
     'MeanderingProgrammer/render-markdown.nvim',

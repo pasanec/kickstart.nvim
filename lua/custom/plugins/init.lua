@@ -8,21 +8,7 @@ return {
     dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
     opts = {},
   },
-  {
-    'praem90/nvim-phpcsf',
-    dependencies = { 'nvim-telescope/telescope.nvim' },
-    ft = 'php',
-    config = function()
-      local phpsniff = require 'phpcs'
-      phpsniff.setup {
-        phpcs = vim.fn.expand('~') .. '/.config/composer/vendor/bin/phpcs',
-        phpcbf = vim.fn.expand('~') .. '/.config/composer/vendor/bin/phpcbf',
-        standard = 'moodle-extra',
-      }
-      vim.keymap.set('n', '<leader>ps', phpsniff.cs, { desc = '[P]HP [S]niff' })
-      vim.keymap.set('n', '<leader>pf', phpsniff.cbf, { desc = '[P]HP [F]ormat' })
-    end,
-  },
+  
   {
     'stevearc/oil.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if prefer nvim-web-devicons
@@ -63,15 +49,37 @@ return {
       'github/copilot.vim',
     },
     opts = {
+      -- log_level = 'DEBUG',
+      adapters = {
+        http = {
+          copilot = function()
+            return require('codecompanion.adapters').extend 'copilot'
+          end,
+          qween = function()
+            return require('codecompanion.adapters').extend('ollama', {
+              name = 'qwen',
+              env = {
+                url = 'http://127.0.0.1:11434',
+                api_key = 'hello',
+              },
+              schema = {
+                model = {
+                  default = 'hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q4_K_XL',
+                },
+              },
+            })
+          end,
+        },
+      },
       strategies = {
         chat = {
-          adapter = "copilot",
+          adapter = 'copilot',
         },
         inline = {
-          adapter = "copilot",
+          adapter = 'copilot',
         },
         agent = {
-          adapter = "copilot",
+          adapter = 'copilot',
         },
       },
     },

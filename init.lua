@@ -689,6 +689,8 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
+        cssls = {},
+        tsserver = {},
 
         lua_ls = {
           -- cmd = { ... },
@@ -704,7 +706,77 @@ require('lazy').setup({
             },
           },
         },
-        intelephense = {},
+        intelephense = {
+          root_dir = require('lspconfig.util').root_pattern('config.php', '.git'),
+          settings = {
+            intelephense = {
+              files = {
+                exclude = {
+                  '**/.git/**',
+                  '**/.svn/**',
+                  '**/.hg/**',
+                  '**/CVS/**',
+                  '**/.DS_Store/**',
+                  '**/node_modules/**',
+                  '**/bower_components/**',
+                  '**/vendor/**',
+                  '**/thirdpartylibs.xml',
+                  '**/yui/**',
+                  '**/amd/build/**',
+                  '**/amd/src/**',
+                },
+              },
+              stubs = {
+                'apache',
+                'bcmath',
+                'bz2',
+                'calendar',
+                'Core',
+                'ctype',
+                'curl',
+                'date',
+                'dom',
+                'exif',
+                'fileinfo',
+                'filter',
+                'gd',
+                'hash',
+                'iconv',
+                'intl',
+                'json',
+                'ldap',
+                'libxml',
+                'mbstring',
+                'mysqli',
+                'openssl',
+                'pcre',
+                'pgsql',
+                'Phar',
+                'session',
+                'SimpleXML',
+                'soap',
+                'sockets',
+                'sodium',
+                'spl',
+                'standard',
+                'sysvsem',
+                'tokenizer',
+                'xml',
+                'xmlreader',
+                'xmlrpc',
+                'xmlwriter',
+                'zip',
+                'zlib',
+              },
+              diagnostics = {
+                undefinedProperties = false,
+                undefinedVariables = false,
+                undefinedConstants = false,
+                undefinedTypes = false,
+              },
+            },
+          },
+        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -720,11 +792,20 @@ require('lazy').setup({
       --
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
-      })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      require('mason-tool-installer').setup {
+        ensure_installed = {
+          -- LSPs
+          'lua-language-server', -- for lua_ls
+          'css-lsp', -- for cssls
+          'typescript-language-server', -- for tsserver
+          'intelephense',
+
+          -- Formatters
+          'stylua',
+          'prettierd',
+          'phpcs',
+        },
+      }
 
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
@@ -763,24 +844,29 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true, php = true, js = true }
-        local lsp_format_opt
+        local disable_filetypes = { c = true, cpp = true }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
         end
+        return {
+          timeout_ms = 500,
+          lsp_format = 'fallback',
+        }
       end,
+      formatters = {
+        phpcbf = {
+          command = 'phpcbf',
+          args = { '--standard=moodle-extra', '-' },
+          stdin = true,
+        },
+      },
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
+        php = { 'phpcbf' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        css = { 'prettierd', 'prettier', stop_after_first = true },
+        handlebars = { 'prettierd', 'prettier', stop_after_first = true },
+        mustache = { 'prettierd', 'prettier', stop_after_first = true },
       },
     },
   },
@@ -952,7 +1038,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'php', 'javascript', 'css' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1020,15 +1106,15 @@ require('lazy').setup({
   },
 })
 -- Autocommmand to force syntax highlighting for mustache filetype.
-vim.api.nvim_create_autocmd('FileType', {
-  -- pattern = { 'mustache' },
-  pattern = { 'mustache' },
+vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
+  pattern = '*.mustache',
   callback = function()
-    if vim.fn.expand '%:e' == 'mustache' then
-      -- vim.bo.filetype = 'helm'
-      vim.bo.filetype = 'handlebars'
-    end
+    vim.bo.filetype = 'handlebars'
   end,
 })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+vim.opt.tabstop = 4 -- A tab is displayed as 4 spaces
+vim.opt.shiftwidth = 4 -- Indent by 4 spaces
+vim.opt.softtabstop = 4 -- A tab key press inserts 4 spaces
+vim.opt.expandtab = true -- Use spaces, not tab characters
